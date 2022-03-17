@@ -1,0 +1,120 @@
+---
+# This installs prometheus as a systemd service
+- name: Create prometheus Service Account
+  ansible.builtin.user:
+    name: prometheus
+    create_home: no
+    shell: /bin/false
+    comment: Prometheus Service Account
+    group: prometheus
+
+- name: Create /etc/prometheus
+  ansible.builtin.file:
+    path: /etc/prometheus
+    state: directory
+    recurse: yes
+    owner: prometheus
+    group: prometheus
+
+- name: Create /etc/prometheus
+  ansible.builtin.file:
+    path: /etc/prometheus/rules
+    state: directory
+    recurse: yes
+    owner: prometheus
+    group: prometheus
+
+- name: Create /var/lib/prometheus
+  ansible.builtin.file:
+    path: /var/lib/prometheus
+    state: directory
+    recurse: yes
+    owner: prometheus
+    group: prometheus
+
+- name: Create /etc/prometheus
+  ansible.builtin.file:
+    path: /tmp/prometheus
+    state: directory
+    recurse: yes
+
+- name: Download and Extract Prometheus
+  ansible.builtin.unarchive:
+    src: https://github.com/prometheus/prometheus/releases/download/v2.34.0-rc.0/prometheus-2.34.0-rc.0.linux-amd64.tar.gz
+    dest: /tmp/prometheus
+    remote_src: yes
+
+- name: Copy Prometheus from tmp folder  to /usr/local
+  ansible.builtin.copy:
+    src: /tmp/prometheus/prometheus-2.34.0-rc.0.linux-amd64/prometheus
+    dest: /usr/local/bin/prometheus
+    owner: prometheus
+    group: prometheus
+    mode: '0744'
+    remote_src: yes
+
+- name: Copy Promtool from tmp folder  to /usr/local
+  ansible.builtin.copy:
+    src: /tmp/prometheus/prometheus-2.34.0-rc.0.linux-amd64/promtool
+    dest: /usr/local/bin/promtool
+    owner: prometheus
+    group: prometheus
+    mode: '0744'
+    remote_src: yes
+
+- name: Copy Promtool from tmp folder  to /usr/local
+  ansible.builtin.copy:
+    src: /tmp/prometheus/prometheus-2.34.0-rc.0.linux-amd64/promtool
+    dest: /usr/local/bin/promtool
+    owner: prometheus
+    group: prometheus
+    mode: '0744'
+    remote_src: yes
+
+- name: Copy console_libaries from tmp folder  to /etc/prometheus
+  ansible.builtin.copy:
+    src: /tmp/prometheus/prometheus-2.34.0-rc.0.linux-amd64/console_libraries
+    dest: /etc/prometheus/console_libraries
+    owner: prometheus
+    group: prometheus
+    mode: '0744'
+    remote_src: yes
+
+- name: Copy consoles from tmp folder  to /etc/prometheus
+  ansible.builtin.copy:
+    src: /tmp/prometheus/prometheus-2.34.0-rc.0.linux-amd64/consoles
+    dest: /etc/prometheus/consoles
+    owner: prometheus
+    group: prometheus
+    mode: '0744'
+    remote_src: yes
+
+- name: Prometheus.yml template
+  ansible.builtin.template:
+    src: prometheus.yml
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+    mode: '0744'
+
+- name: Prometheus base alert rules
+  ansible.builtin.template:
+    src: downrules.yml
+    dest: /etc/prometheus/rules/downrules.yml
+    owner: prometheus
+    group: prometheus
+    mode: '0744'
+
+- name: Prometheus.service template
+  ansible.builtin.template:
+    src: prometheus.service
+    dest: /etc/systemd/system/prometheus.service
+    owner: prometheus
+    group: prometheus
+    mode: '0744'
+
+- name: Start service Prometheus and Enable it
+  ansible.builtin.service:
+    name: prometheus
+    state: started
+    enabled: yes

@@ -1,0 +1,8 @@
+[prometheus-host]
+rocky@52.27.227.228 ansible_ssh_private_key_file=~/.ssh/keys/django-1.pem remote_host=rocky
+
+[doncrea]
+rocky@www.doncrea.com ansible_ssh_private_key_file=~/.ssh/keys/django-1.pem remote_host=rocky
+
+[email]
+ubuntu@mail.disruptivecoding.com ansible_ssh_private_key_file=~/.ssh/keys/django-1.pem remote_host=ubuntu

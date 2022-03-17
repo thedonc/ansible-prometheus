@@ -1,0 +1,43 @@
+---
+# This installs pushgateway as a systemd service
+- name: Create blackbox_exporter Service Account
+  ansible.builtin.user:
+    name: blackbox_exporter
+    create_home: no
+    shell: /bin/false
+    comment: blackbox_exporter Service Account
+
+- name: Create /tmp/blackbox_exporter
+  ansible.builtin.file:
+    path: /tmp/blackbox_exporter
+    state: directory
+    recurse: yes
+
+- name: Download and Extract blackbox_exporter
+  ansible.builtin.unarchive:
+    src: https://github.com/prometheus/blackbox_exporter/releases/download/v0.20.0-rc.0/blackbox_exporter-0.20.0-rc.0.linux-amd64.tar.gz
+    dest: /tmp/blackbox_exporter
+    remote_src: yes
+
+- name: Copy pushgateway from tmp folder  to /usr/local
+  ansible.builtin.copy:
+    src: /tmp/pushgateway/blackbox_exporter-0.20.0-rc.0.linux-amd64/blackbox_Exporter
+    dest: /usr/local/bin/blackbox_exporter
+    owner: blackbox_exporter
+    group: blackbox_exporter
+    mode: '0744'
+    remote_src: yes
+
+- name: blackbox_exporter.service template
+  ansible.builtin.template:
+    src: blackbox_exporter.service
+    dest: /etc/systemd/system/blackbox_exporter.service
+    owner: blackbox_exporter
+    group: blackbox_exporter
+    mode: '0744'
+
+- name: Start service blackbox_exporter and Enable it
+  ansible.builtin.service:
+    name: blackbox_exporter
+    state: started
+    enabled: yes

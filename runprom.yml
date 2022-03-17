@@ -1,0 +1,9 @@
+- hosts: prometheus-host
+  become: true
+  ignore_errors: true
+  roles:
+    #- role: prometheus
+    #- role: node-exporter
+    #- role: alert-manager
+    #- role: pushgateway
+    - role: blackbox-exporter

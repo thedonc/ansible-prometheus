@@ -1,0 +1,43 @@
+---
+# This installs pushgateway as a systemd service
+- name: Create pushgateway Service Account
+  ansible.builtin.user:
+    name: pushgateway
+    create_home: no
+    shell: /bin/false
+    comment: Pushgateway Service Account
+
+- name: Create /tmp/pushgateway
+  ansible.builtin.file:
+    path: /tmp/pushgateway
+    state: directory
+    recurse: yes
+
+- name: Download and Extract pushgateway
+  ansible.builtin.unarchive:
+    src: https://github.com/prometheus/pushgateway/releases/download/v1.4.2/pushgateway-1.4.2.linux-amd64.tar.gz
+    dest: /tmp/pushgateway
+    remote_src: yes
+
+- name: Copy pushgateway from tmp folder  to /usr/local
+  ansible.builtin.copy:
+    src: /tmp/pushgateway/pushgateway-1.4.2.linux-amd64/pushgateway
+    dest: /usr/local/bin/pushgateway
+    owner: pushgateway
+    group: pushgateway
+    mode: '0744'
+    remote_src: yes
+
+- name: pushgateway.service template
+  ansible.builtin.template:
+    src: pushgateway.service
+    dest: /etc/systemd/system/pushgateway.service
+    owner: pushgateway
+    group: pushgateway
+    mode: '0744'
+
+- name: Start service pushgateway and Enable it
+  ansible.builtin.service:
+    name: pushgateway
+    state: started
+    enabled: yes

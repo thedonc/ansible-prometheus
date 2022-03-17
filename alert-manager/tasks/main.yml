@@ -1,0 +1,76 @@
+---
+# This installs alert manager as a systemd service
+- name: Create Alertmanager Service Account
+  ansible.builtin.user:
+    name: alertmanager
+    create_home: no
+    shell: /bin/false
+    comment: Node Exporter Service Account
+
+- name: Create /etc/alertmanager
+  ansible.builtin.file:
+    path: /etc/alertmanager
+    state: directory
+    recurse: yes
+    owner: alertmanager
+    group: alertmanager
+
+- name: Create /var/lib/alertmanager
+  ansible.builtin.file:
+    path: /var/lib/alertmanager
+    state: directory
+    recurse: yes
+    owner: alertmanager
+    group: alertmanager
+
+- name: Create /tmp/alertmanager
+  ansible.builtin.file:
+    path: /tmp/alertmanager
+    state: directory
+    recurse: yes
+
+- name: Download and Extract Node Expoter
+  ansible.builtin.unarchive:
+    src: https://github.com/prometheus/alertmanager/releases/download/v0.23.0/alertmanager-0.23.0.linux-amd64.tar.gz
+    dest: /tmp/alertmanager
+    remote_src: yes
+
+- name: Copy Alertmanager from tmp folder  to /usr/local
+  ansible.builtin.copy:
+    src: /tmp/alertmanager/alertmanager-0.23.0.linux-amd64/alertmanager
+    dest: /usr/local/bin/alertmanager
+    owner: alertmanager
+    group: alertmanager
+    mode: '0744'
+    remote_src: yes
+
+- name: Copy AMtool from tmp folder  to /usr/local
+  ansible.builtin.copy:
+    src: /tmp/alertmanager/alertmanager-0.23.0.linux-amd64/amtool
+    dest: /usr/local/bin/amtool
+    owner: alertmanager
+    group: alertmanager
+    mode: '0744'
+    remote_src: yes
+
+- name: alertmanager.service template
+  ansible.builtin.template:
+    src: alertmanager.service
+    dest: /etc/systemd/system/alertmanager.service
+    owner: alertmanager
+    group: alertmanager
+    mode: '0744'
+
+- name: alertmanager.yml template
+  ansible.builtin.template:
+    src: alertmanager.yml
+    dest: /etc/alertmanager/alertmanager.yml
+    owner: alertmanager
+    group: alertmanager
+    mode: '0744'
+
+- name: Start service Prometheus and Enable it
+  ansible.builtin.service:
+    name: alertmanager
+    state: started
+    enabled: yes
